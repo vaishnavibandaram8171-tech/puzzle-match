@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Sliding Puzzle Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        p {
+            color: #666;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        #board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+            background-color: #ccc;
+            padding: 5px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .tile {
+            background-color: #007bff;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+        .tile:hover {
+            background-color: #0056b3;
+        }
+        .tile.empty {
+            background-color: #ccc;
+            cursor: default;
+        }
+        #restart {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #restart:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Sliding Puzzle</h1>
+    <p>Click adjacent tiles to move them into the empty space. Order numbers 1 to 8!</p>
+    
+    <div id="board"></div>
+    <button id="restart" onclick="initGame()">Restart Game</button>
+
+    <script>
+        const board = document.getElementById('board');
+        let state = [1, 2, 3, 4, 5, 6, 7, '', 8]; // Winning state is 1-8 in order, empty at end
+
+        function getAdjacentIndices(index) {
+            const row = Math.floor(index / 3);
+            const col = index % 3;
+            const adjacent = [];
+            if (row > 0) adjacent.push(index - 3);
+            if (row < 2) adjacent.push(index + 3);
+            if (col > 0) adjacent.push(index - 1);
+            if (col < 2) adjacent.push(index + 1);
+            return adjacent;
+        }
+
+        function handleTileClick(index) {
+            const emptyIndex = state.indexOf('');
+            const validMoves = getAdjacentIndices(emptyIndex);
+
+            if (validMoves.includes(index)) {
+                state[emptyIndex] = state[index];
+                state[index] = '';
+                renderBoard();
+                checkWin();
+            }
+        }
+
+        function renderBoard() {
+            board.innerHTML = '';
+            state.forEach((value, index) => {
+                const tile = document.createElement('div');
+                tile.classList.add('tile');
+                if (value === '') {
+                    tile.classList.add('empty');
+                } else {
+                    tile.textContent = value;
+                    tile.addEventListener('click', () => handleTileClick(index));
+                }
+                board.appendChild(tile);
+            });
+        }
+
+        function shuffle() {
+            // Perform random valid moves to ensure the puzzle is solvable
+            for (let i = 0; i < 100; i++) {
+                const emptyIndex = state.indexOf('');
+                const validMoves = getAdjacentIndices(emptyIndex);
+                const randomMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+                state[emptyIndex] = state[randomMove];
+                state[randomMove] = '';
+            }
+        }
+
+        function checkWin() {
+            const winningStr = "1,2,3,4,5,6,7,8,";
+            if (state.join(',') === winningStr) {
+                setTimeout(() => alert('Congratulations, you solved the puzzle!'), 100);
+            }
+        }
+
+        function initGame() {
+            shuffle();
+            renderBoard();
+        }
+
+        initGame();
+    </script>
+</body>
+</html>
